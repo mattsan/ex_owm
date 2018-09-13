@@ -14,19 +14,9 @@ defmodule ExOwm.Api do
   @forecast5_url %{@owm_uri | path: "/data/#{@owm_version}/forecast"}
   @forecast16_url %{@owm_uri | path: "/data/#{@owm_version}/forecast/daily"}
 
-  def current(%Query{} = query) do
-    weather = ExOwm.Api.Current.new()
-
-    request(@current_url, query, weather)
-  end
-
-  def forecast5(%Query{} = query) do
-    request(@forecast5_url, query, ExOwm.Api.Forecast5.new())
-  end
-
-  def forecast16(%Query{} = query) do
-    request(@forecast16_url, query, ExOwm.Api.Forecast16.new())
-  end
+  def current(%Query{} = query), do: request(@current_url, query, ExOwm.Api.Current.new())
+  def forecast5(%Query{} = query), do: request(@forecast5_url, query, ExOwm.Api.Forecast5.new())
+  def forecast16(%Query{} = query), do: request(@forecast16_url, query, ExOwm.Api.Forecast16.new())
 
   defp request(%URI{} = uri, %Query{} = query, weather) do
     response =
