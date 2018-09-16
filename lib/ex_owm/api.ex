@@ -22,12 +22,6 @@ defmodule ExOwm.Api do
     GenServer.start_link(@module, opts, name: @module)
   end
 
-  def current, do: GenServer.call(@module, :current)
-  def forecast5, do: GenServer.call(@module, :forecast5)
-  def forecast16, do: GenServer.call(@module, :forecast16)
-  def get_params, do: GenServer.call(@module, :get_params)
-  def set_params(params), do: GenServer.call(@module, {:set_params, params})
-
   def init(opts) do
     query = Query.init(opts)
     {:ok, %{query: query}}
