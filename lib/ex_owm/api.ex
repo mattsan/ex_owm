@@ -1,4 +1,6 @@
 defmodule ExOwm.Api do
+  use GenServer
+
   alias ExOwm.Api.Query
 
   @owm_version "2.5"
@@ -14,9 +16,51 @@ defmodule ExOwm.Api do
   @forecast5_url %{@owm_uri | path: "/data/#{@owm_version}/forecast"}
   @forecast16_url %{@owm_uri | path: "/data/#{@owm_version}/forecast/daily"}
 
-  def current(%Query{} = query), do: request(@current_url, query, ExOwm.Api.Current.new())
-  def forecast5(%Query{} = query), do: request(@forecast5_url, query, ExOwm.Api.Forecast5.new())
-  def forecast16(%Query{} = query), do: request(@forecast16_url, query, ExOwm.Api.Forecast16.new())
+  @module __MODULE__
+
+  def start_link(opts) do
+    GenServer.start_link(@module, opts, name: @module)
+  end
+
+  def current, do: GenServer.call(@module, :current)
+  def forecast5, do: GenServer.call(@module, :forecast5)
+  def forecast16, do: GenServer.call(@module, :forecast16)
+  def get_params, do: GenServer.call(@module, :get_params)
+  def set_params(params), do: GenServer.call(@module, {:set_params, params})
+
+  def init(opts) do
+    query = Query.init(opts)
+    {:ok, %{query: query}}
+  end
+
+  def handle_call(:current, _from, state) do
+    result = request(@current_url, state.query, ExOwm.Api.Current.new())
+    {:reply, result, state}
+  end
+
+  def handle_call(:forecast5, _from, state) do
+    result = request(@forecast5_url, state.query, ExOwm.Api.Forecast5.new())
+    {:reply, result, state}
+  end
+
+  def handle_call(:forecast16, _from, state) do
+    result = request(@forecast16_url, state.query, ExOwm.Api.Forecast16.new())
+    {:reply, result, state}
+  end
+
+  def handle_call(:get_params, _from, state) do
+    {:reply, state.query, state}
+  end
+
+  def handle_call({:set_params, params}, _from, state) do
+    query =
+      params
+      |> Enum.reduce(state.query, fn {key, value}, acc ->
+        %{acc | key => value}
+      end)
+
+    {:reply, query, %{state | query: query}}
+  end
 
   defp request(%URI{} = uri, %Query{} = query, weather) do
     response =

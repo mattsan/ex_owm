@@ -13,6 +13,7 @@ defmodule ExOwm.MixProject do
 
   def application do
     [
+      mod: {ExOwm.Application, []},
       extra_applications: [:logger]
     ]
   end
