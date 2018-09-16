@@ -14,7 +14,11 @@ defmodule ExOwm.Api.Forecast5 do
 
     def fetch(%List{}, _), do: :error
 
-    def get_and_update(_data, _key, _function), do: :erlang.error(RuntimeError.exception("has not been implemented"))
+    def get_and_update(%List{} = list, key, function) do
+      value = Map.get(list, key)
+      {get_value, update_value} = function.(value)
+      {get_value, %{list | key => update_value}}
+    end
 
     def pop(_data, _key), do: :erlang.error(RuntimeError.exception("has not been implemented"))
   end
@@ -46,7 +50,11 @@ defmodule ExOwm.Api.Forecast5 do
 
   def fetch(%Forecast5{}, _), do: :error
 
-  def get_and_update(_data, _key, _function), do: :erlang.error(RuntimeError.exception("has not been implemented"))
+  def get_and_update(%Forecast5{} = forecast5, key, function) do
+    value = Map.get(forecast5, key)
+    {get_value, update_value} = function.(value)
+    {get_value, %{forecast5 | key => update_value}}
+  end
 
   def pop(_data, _key), do: :erlang.error(RuntimeError.exception("has not been implemented"))
 end

@@ -33,7 +33,15 @@ defmodule ExOwm.Api do
   end
 
   def handle_call(:forecast5, _from, state) do
-    result = request(@forecast5_url, state.query, ExOwm.Api.Forecast5.new())
+    result =
+      case request(@forecast5_url, state.query, ExOwm.Api.Forecast5.new()) do
+        {:ok, 200, forecast5} ->
+          {:ok, 200, update_in(forecast5, [:list, Access.all(), :dt], & &1 |> Timex.from_unix() |> Timex.local())}
+
+        result ->
+          result
+      end
+
     {:reply, result, state}
   end
 
